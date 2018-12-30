@@ -7,7 +7,7 @@ import { map, flatMap, toArray } from 'rxjs/operators';
 
 @Injectable()
 export class ClienteService {
- private urlEndPoints:string = 'http://localhost:8080/cliente';
+ private urlEndPoints:string = 'http://localhost:8080/api-cliente/clientes';
   constructor(private http: HttpClient) { }
 
   getClientes(): Observable<Cliente[]>{
