@@ -8,13 +8,20 @@ import { HttpClient, HttpHeaders, HttpRequest, HttpEvent } from '@angular/common
 import { map, catchError, tap } from 'rxjs/operators';
 import swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import {Region} from './region';
 
 @Injectable()
 export class ClienteService {
   private urlEndPoints: string = 'http://localhost:8080/api-cliente/clientes';
+  private regionEndPoints: string = 'http://localhost:8080/api-regiones';
   constructor(private http: HttpClient, private router: Router) { }
 
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+
+  getRegiones(): Observable<Region[]>{
+    return this.http.get<Region[]>(this.regionEndPoints + '/regiones');
+  }
 
   getClientes(page: number): Observable<any> {
     //return of(CLIENTES);

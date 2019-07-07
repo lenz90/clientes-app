@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Cliente } from './cliente';
+import { Region } from './region'
 import { ClienteService } from './cliente.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import swal from 'sweetalert2';
@@ -10,6 +11,7 @@ import swal from 'sweetalert2';
 })
 export class FormComponent implements OnInit {
   private cliente: Cliente = new Cliente();
+  regiones: Region[];
   private titulo: string = "Crear Cliente"
   private errors: string[];
 
@@ -18,7 +20,12 @@ export class FormComponent implements OnInit {
     private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
-    this.cargarCliente()
+    this.cargarCliente();
+    this.cargarRegiones();
+  }
+
+  public cargarRegiones() {
+    this.clienteService.getRegiones().subscribe(regiones => this.regiones = regiones);
   }
 
   public cargarCliente(): void {
@@ -33,13 +40,14 @@ export class FormComponent implements OnInit {
   }
 
   public create(): void {
+    console.log(this.cliente);
     this.clienteService.createCliente(this.cliente).subscribe(
       cliente => {
         this.router.navigate(['/clientes'])
         swal('Nuevo cliente', `Cliente ${cliente.nombre} creado con éxito`, 'success')
-      },err=> {
+      }, err => {
         this.errors = err.error as string[];
-        console.error('Codigo de error desde el backend: ' + err.status );
+        console.error('Codigo de error desde el backend: ' + err.status);
         console.error(err.error);
       }
     )
@@ -50,11 +58,14 @@ export class FormComponent implements OnInit {
       .subscribe(cliente => {
         this.router.navigate(['/clientes'])
         swal('Cliente Actualizado', `Cliente ${cliente.nombre} actualizado con éxito`, 'success');
-      },err=> {
+      }, err => {
         this.errors = err.error as string[];
-        console.error('Codigo de error desde el backend: ' + err.status );
+        console.error('Codigo de error desde el backend: ' + err.status);
         console.error(err.error);
       })
   }
 
+  public compararRegion(o1: Region, o2: Region) {
+    return null == o1 || null == o2 ? false : o1.id === o2.id;
+  }
 }
