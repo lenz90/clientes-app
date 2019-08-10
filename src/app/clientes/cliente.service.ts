@@ -18,9 +18,22 @@ export class ClienteService {
 
   private headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
+  private isNoAuthorized(e):boolean{
+    if(e.status==401 || e.status==403) {
+      this.router.navigate(['/login'])
+      return true;
+    }
+    return false;
+  }
 
   getRegiones(): Observable<Region[]>{
-    return this.http.get<Region[]>(this.regionEndPoints + '/regiones');
+    return this.http.get<Region[]>(this.regionEndPoints + '/regiones')
+    .pipe(
+      catchError(e => {
+        this.isNoAuthorized(e);
+        return throwError(e);
+      })
+    );
   }
 
   getClientes(page: number): Observable<any> {
@@ -50,6 +63,10 @@ export class ClienteService {
     return this.http.post<Cliente>(this.urlEndPoints, cliente, { headers: this.headers })
       .pipe(
         catchError(e => {
+          if(this.isNoAuthorized(e)) {
+            return throwError(e);
+          }
+          
           if (e.status == 400) {
             return throwError(e);
           }
@@ -67,6 +84,9 @@ export class ClienteService {
         map(response => response as Cliente)
       ).pipe(
         catchError(e => {
+          if(this.isNoAuthorized(e)) {
+            return throwError(e);
+          }
           this.router.navigate(['/clientes'])
           console.error(e.error.mensaje)
           swal('Error al editar.', e.error.mensaje, 'error');
@@ -79,6 +99,9 @@ export class ClienteService {
     return this.http.put<Cliente>(`${this.urlEndPoints}/${cliente.id}`, cliente, { headers: this.headers })
       .pipe(
         catchError(e => {
+          if(this.isNoAuthorized(e)) {
+            return throwError(e);
+          }
           if (e.status == 400) {
             return throwError(e);
           }
@@ -92,9 +115,13 @@ export class ClienteService {
   }
 
   deleteCliente(id: number): Observable<Cliente> {
+    
     return this.http.delete<Cliente>(`${this.urlEndPoints}/${id}`, { headers: this.headers })
       .pipe(
         catchError(e => {
+          if(this.isNoAuthorized(e)) {
+            return throwError(e);
+          }
           console.error(e.error.mensaje)
           swal('Error al eliminar.', e.error.mensaje, 'error');
           return throwError(e);
@@ -111,7 +138,12 @@ export class ClienteService {
       reportProgress: true
     });
 
-    return this.http.request(req);
+    return this.http.request(req).pipe(
+      catchError(e => {
+        this.isNoAuthorized(e);
+        return throwError(e);
+      })
+    );;
 
   }
 }
