@@ -10,7 +10,7 @@ import { PaginatorComponent } from './paginator/paginator.component';
 import { FormComponent } from './clientes/form.component';
 import { ClienteService } from './clientes/cliente.service';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { registerLocaleData } from '@angular/common'
 //import { CLIENTES } from './clientes.json';
@@ -21,6 +21,10 @@ import { MatDatepickerModule } from '@angular/material';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { DetalleComponent } from './clientes/detalle/detalle.component';
 import { LoginComponent } from './usuarios/login.component';
+import { AuthGuard } from './usuarios/guards/auth.guard';
+import { RoleGuard } from './usuarios/guards/role.guard';
+import { TokenInterceptor } from './usuarios/interceptors/token.interceptor';
+import { AuthInterceptor } from './usuarios/interceptors/auth.interceptor';
 
 
 registerLocaleData(localeES, 'es-PE');
@@ -30,8 +34,8 @@ const routes = [
   { path: 'directivas', component: DirectivaComponent },
   { path: 'clientes', component: ClientesComponent },
   { path: 'clientes/page/:page', component: ClientesComponent },
-  { path: 'clientes/form', component: FormComponent },
-  { path: 'clientes/form/:id', component: FormComponent },
+  { path: 'clientes/form', component: FormComponent, canActivate:[AuthGuard, RoleGuard], data:{role:'ROLE_ADMIN'} },
+  { path: 'clientes/form/:id', component: FormComponent , canActivate:[AuthGuard, RoleGuard], data:{role:'ROLE_ADMIN'} },
   { path: 'login', component: LoginComponent }
 ]
 
@@ -56,7 +60,9 @@ const routes = [
     MatDatepickerModule,
     MatMomentDateModule
   ],
-  providers: [ClienteService, { provide: LOCALE_ID, useValue: 'es-PE' }],
+  providers: [ClienteService, { provide: LOCALE_ID, useValue: 'es-PE' }, 
+  { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
